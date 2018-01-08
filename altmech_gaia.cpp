@@ -563,7 +563,6 @@ int main(int argc, char **argv) {
 	      environment[j] += nutrient_trickle[j];
 	      if (environment[j] < 0) { environment[j] = 0; }
 	      
-	      // just in case the net nutrient influx is negative not possibl though I don't think....
 	      
             }
 
@@ -592,12 +591,11 @@ int main(int argc, char **argv) {
 
 	  if (i_biomass <= starve_thresh) {
             // so if the biomass count is low, the above will be high so high prob of death
-            // THIS SHOULD PROBABLY BE GAUSSIAN
 
             species[i].population--;
-            species[i].biomass -= i_biomass; // remove biomass of dead microbe THINK ABOUT THIS
+            species[i].biomass -= i_biomass; // remove biomass of dead microbe 
             total_population--;
-            if (species[i].biomass < 1) { species[i].biomass = 0; species[i].population = 0; } //THINK ABOUT THIS TOO
+            if (species[i].biomass < 1) { species[i].biomass = 0; species[i].population = 0; } 
             if (species[i].population == 0){
 	      species.erase(species.begin() + i); // remove from list if extinct
             }
