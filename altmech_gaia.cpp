@@ -604,7 +604,7 @@ int main(int argc, char **argv) {
 	  else if (drand48() <= p_kill && species[i].population > 0) {
             
             species[i].population--;
-            species[i].biomass -= i_biomass; // remove biomass of dead microbe THINK ABOUT THIS
+            species[i].biomass -= i_biomass; // remove biomass of dead microbe 
             total_population--;
 	    if (total_population <= 0) {cout << "\n TOTAL EXTICTION!" << endl; end_experiment = 1;}
             if (species[i].population == 0){
@@ -682,12 +682,8 @@ int main(int argc, char **argv) {
 
 	  }
 
-	    // each time step calculate total nutrient demand by total population
-	    // use that to weight probability of eating
         
         
-	    // biomass convertion does separately to nutrient intake?
-	  // calculate the prob of being able to eat at all, and then just loop for the max consumption rate.
 	}
 
 	
