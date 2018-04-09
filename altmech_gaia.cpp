@@ -82,7 +82,8 @@ vector < vector <int> > nutrient_genome_interactions(int genome_length, int num_
     
     vector < vector <int> > all_metabolisms;
     //std::normal_distribution<double> distribution(3,1.0); // mean 2, variance 1
- 
+    
+    // seed species metabolism
     cons_ex_vector[0] = 1;  // eat nutrient 1
     cons_ex_vector[7] = 1;  // excrete nutrient 4
     all_metabolisms.push_back(cons_ex_vector);
@@ -92,9 +93,13 @@ vector < vector <int> > nutrient_genome_interactions(int genome_length, int num_
       int neg = 0;
 
       for (int j = 0; j < temp.size(); j++) {
-	temp[j] = 11*(2.0*drand48() - 1); // random number between -10 and 10 as 10 is our max consumption
-	if (temp[j] < 0) { temp[j] = floor(temp[j]); }
-	if (temp[j] > 0) { temp[j] = ceil(temp[j]); }
+	double a = 11*(2.0*drand48() - 1); //random number between (11,-11) actual range with floor / ceil is [10,-10]
+	double b = 11*(2.0*drand48() - 1);
+	if (a > 0) { a = floor(a); }
+	else { a = ceil(a); }
+	if (b > 0) { b = floor(b); }
+	else { b = ceil(b); }
+	temp[j] = a+b; 
 
 	if (temp[j] > 0) { pos += 1; }    
 	else if (temp[j] < 0) { neg += 1; } 
@@ -260,7 +265,6 @@ vector < double > abiotic_genome_interactions(int genome_length) {
 }
 
 
-
 //************* CALCULATE NUTRIENT DEMAND **********
 
 vector <int> nutrient_demand_calc (vector <microbe> &species, double abiotic_T, double prefered_abiotic, int num_nutrients, double abiotic_scaling, vector< vector<int> > &n_g_interacts, int max_consumption) {
@@ -309,10 +313,6 @@ vector <int> nutrient_demand_calc (vector <microbe> &species, double abiotic_T, 
 }
 
 
-
-
-
-
 int main(int argc, char **argv) {
 
     
@@ -351,8 +351,6 @@ int main(int argc, char **argv) {
 
 
     // RANDOM NUMBER GENERATORS
-    //srand48 (time(0));
-    //time_t t = time(0);  //provide seed for randomness in different runs
     int t = atoi(argv[1]);
     srand48 (t);
     default_random_engine generator; // used for our distributions
@@ -371,28 +369,10 @@ int main(int argc, char **argv) {
 
     microbe new_microbe;
 
-
-    vector < microbe > species; //(1, new_microbe);
+    // set up seed species
+    vector < microbe > species; 
     int total_population = 0;
     
-    
-  //   for (int j = 0; j < initial_population; j++) {
-
-  /*    int genome_new = floor(drand48()*pow(2,genome_length)); // randomly generate microbes
-      int already_exists = 0;
-      for (int k = 0; k < species.size(); k++){
-
-	if (genome_new == species[k].genome) {
-	  species[k].population++;
-	  species[k].biomass += 80;
-	  already_exists = 1;
-	}
-
-	
-      }
-      
-      if (already_exists == 0) {  */
-	//new_microbe.population = 1;
 	new_microbe.population = initial_population;
         new_microbe.genome = 0; //genome_new;
         new_microbe.nutrient = 0;
@@ -422,7 +402,7 @@ int main(int argc, char **argv) {
     double species_nutrient_avg;
     double species_biomass_avg;
     int nutrient_available;
-    const double abiotic_scaling = 0.0035; //0.002; // This variable controls microbe temperature sensitivity
+    const double abiotic_scaling = 0.0025; //0.002; //0.0035; // This variable controls microbe temperature sensitivity
     double satisfaction;
     double factor_i;
     //double abiotic_T_sum = 0;
@@ -450,16 +430,7 @@ int main(int argc, char **argv) {
     
     // DATA FILES
     int file_num = atoi(argv[3]);
-    //ofstream macro_data ("flask_world_survival_3_"+to_string(file_num)+".txt");
-    ofstream macro_data ("flask_world_survival_5_"+to_string(file_num)+".txt");
-
-    
-    // BUG CHECKING VARIABLES
-    int total_pop_bug = 0;
-    //ofstream biomass_bug ("biomass_bug.txt");
-    //ofstream reproduction_bug ("reproduction_bug.txt");
-
-
+    ofstream macro_data ("H3_"+to_string(file_num)+".txt");
 
     while (init_counter < init_period) {   // INITIALISE OUR ENVIRONMENT
 
@@ -563,6 +534,7 @@ int main(int argc, char **argv) {
 	      environment[j] += nutrient_trickle[j];
 	      if (environment[j] < 0) { environment[j] = 0; }
 	      
+	      // just in case the net nutrient influx is negative not possible though I don't think....
 	      
             }
 
@@ -593,7 +565,7 @@ int main(int argc, char **argv) {
             // so if the biomass count is low, the above will be high so high prob of death
 
             species[i].population--;
-            species[i].biomass -= i_biomass; // remove biomass of dead microbe 
+            species[i].biomass -= i_biomass; // remove biomass of dead microbe
             total_population--;
             if (species[i].biomass < 1) { species[i].biomass = 0; species[i].population = 0; } 
             if (species[i].population == 0){
@@ -604,7 +576,7 @@ int main(int argc, char **argv) {
 	  else if (drand48() <= p_kill && species[i].population > 0) {
             
             species[i].population--;
-            species[i].biomass -= i_biomass; // remove biomass of dead microbe 
+            species[i].biomass -= i_biomass; // remove biomass of dead microbe THINK ABOUT THIS
             total_population--;
 	    if (total_population <= 0) {cout << "\n TOTAL EXTICTION!" << endl; end_experiment = 1;}
             if (species[i].population == 0){
@@ -682,8 +654,12 @@ int main(int argc, char **argv) {
 
 	  }
 
+	    // each time step calculate total nutrient demand by total population
+	    // use that to weight probability of eating
         
         
+	    // biomass convertion does separately to nutrient intake?
+	  // calculate the prob of being able to eat at all, and then just loop for the max consumption rate.
 	}
 
 	
